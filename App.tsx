@@ -14,6 +14,7 @@ import {
 import HomeScreen from './src/screens/HomeScreen';
 import { PaperProvider } from 'react-native-paper';
 import "./global.css";
+import RoleManagementScreen from './src/screens/admin/RoleManagementScreen';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -21,8 +22,8 @@ function App() {
   return (
     <PaperProvider>
       <SafeAreaProvider>
-        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-        <HomeScreen/>
+        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'}/>
+           <RoleManagementScreen />
       </SafeAreaProvider>
     </PaperProvider>
   );
