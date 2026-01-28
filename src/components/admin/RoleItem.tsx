@@ -67,13 +67,17 @@ const RoleItem = ({ role, onEdit, onDelete }: RoleItemProps) => {
             style={{
               backgroundColor: item.is_active ? '#DCFCE7' : '#FEF3C7',
               height: 28,
+              justifyContent: 'center',
             }}
             textStyle={{
               color: item.is_active ? '#15803D' : '#B45309',
               fontSize: 12,
-              fontWeight: '600'
+              fontWeight: '600',
+              lineHeight: 14,
+              marginVertical: 0,
             }}
             icon={item.is_active ? "check-circle" : "pause-circle"}
+
           >
             {item.is_active ? "Kích hoạt" : "Tạm ngưng"}
           </Chip>

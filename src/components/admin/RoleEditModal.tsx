@@ -147,6 +147,7 @@ const RoleEditModal = ({ visible, onDismiss, roleData }: RoleEditModalProps) => 
                   outlineColor="#E3F2FD"
                   activeOutlineColor="#1E88E5"
                   left={<TextInput.Icon icon="star" color="#1E88E5" />}
+                  style={{ height: 60 }}
                 />
               </View>
 
@@ -154,15 +155,17 @@ const RoleEditModal = ({ visible, onDismiss, roleData }: RoleEditModalProps) => 
               <View
                 style={{
                   flex: 1,
+                  marginTop: 6,
                   borderWidth: 1,
                   borderColor: '#E3F2FD',
-                  borderRadius: 8,
-                  padding: 12,
+                  borderRadius: 4,
+                  paddingHorizontal: 10,
+                  paddingVertical: 6,
                   backgroundColor: '#F5FAFF',
                   justifyContent: 'center',
                 }}
               >
-                <Text variant="labelSmall" style={{ color: '#1E88E5', marginBottom: 6, fontWeight: '600' }}>
+                <Text variant="labelSmall" style={{ color: '#1E88E5', marginBottom: 4, fontWeight: '600' }}>
                   Trạng thái
                 </Text>
                 <View className="flex-row items-center justify-between">
