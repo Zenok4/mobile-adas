@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, FlatList, Alert } from 'react-native';
-import { Text, Searchbar, FAB, ActivityIndicator, IconButton, Chip } from 'react-native-paper';
+import { View, FlatList, Text, Alert } from 'react-native';
+import { Searchbar, FAB, ActivityIndicator, IconButton, Chip } from 'react-native-paper';
 import RoleItem from '../../components/admin/RoleItem';
 import RoleEditModal from '../../components/admin/RoleEditModal';
 
@@ -10,25 +10,25 @@ const RoleManagementScreen = () => {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // State điều khiển Modal
+  // Modal Control State
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRole, setSelectedRole] = useState<any>(null);
 
   // --- HANDLERS ---
 
-  // Mở modal thêm mới
+  // Open modal for adding new role
   const handleAdd = () => {
     setSelectedRole(null);
     setModalVisible(true);
   };
 
-  // Mở modal chỉnh sửa
+  // Open modal for editing role
   const handleEdit = (role: any) => {
     setSelectedRole(role);
     setModalVisible(true);
   };
 
-  // Xử lý xóa
+  // Handle delete
   const handleDelete = (roleId: number) => {
     Alert.alert(
       "Xác nhận xóa",
@@ -43,17 +43,17 @@ const RoleManagementScreen = () => {
           style: "destructive",
           onPress: () => {
             console.log("Call API Delete Role ID:", roleId);
-            // TODO: Gọi API delete và load lại danh sách
+            // TODO: Call API delete and reload list
           }
         }
       ]
     );
   };
 
-  // Hàm refresh danh sách (sẽ gọi API)
+  // Refresh list function (will call API)
   const handleRefresh = () => {
     console.log("Refresh danh sách roles");
-    // TODO: Gọi API load lại danh sách
+    // TODO: Call API to reload list
   };
 
   // --- RENDER ---
@@ -61,61 +61,24 @@ const RoleManagementScreen = () => {
     <View className="flex-1 bg-gray-50">
 
       {/* 1. Header Area - Blue Theme */}
-      <View
-        style={{
-          backgroundColor: '#1E88E5',
-          paddingTop: 16,
-          paddingBottom: 20,
-          paddingHorizontal: 16,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-          elevation: 4,
-        }}
-      >
+      <View className="bg-blue-600 pt-4 pb-5 px-4 shadow-md">
         {/* Title & Stats Row */}
         <View className="flex-row justify-between items-center mb-3">
           <View className="flex-1">
-            <Text
-              variant="headlineMedium"
-              style={{
-                fontWeight: '700',
-                color: 'white',
-                marginBottom: 4
-              }}
-            >
+            <Text className="text-white text-3xl font-bold mb-1">
               Quản lý vai trò
             </Text>
-            <Text
-              variant="bodyMedium"
-              style={{ color: 'rgba(255, 255, 255, 0.8)' }}
-            >
+            <Text className="text-white/80 text-base">
               Phân quyền và cấu hình hệ thống
             </Text>
           </View>
 
           {/* Stats Badge */}
-          <View
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              borderRadius: 20,
-              paddingHorizontal: 16,
-              paddingVertical: 8,
-              borderWidth: 1,
-              borderColor: 'rgba(255, 255, 255, 0.3)',
-            }}
-          >
-            <Text
-              variant="labelSmall"
-              style={{ color: 'rgba(255, 255, 255, 0.8)', marginBottom: 2 }}
-            >
+          <View className="bg-white/20 rounded-2xl px-4 py-2 border border-white/30">
+            <Text className="text-white/80 text-xs font-bold mb-0.5">
               Tổng số
             </Text>
-            <Text
-              variant="titleLarge"
-              style={{ color: 'white', fontWeight: '700', textAlign: 'center' }}
-            >
+            <Text className="text-white text-2xl font-bold text-center">
               {roles.filter(r => r !== null).length}
             </Text>
           </View>
@@ -126,11 +89,8 @@ const RoleManagementScreen = () => {
           placeholder="Tìm kiếm theo tên vai trò..."
           onChangeText={setSearchQuery}
           value={searchQuery}
-          style={{
-            backgroundColor: 'white',
-            borderRadius: 12,
-            elevation: 0,
-          }}
+          className="bg-white rounded-xl"
+          style={{ elevation: 0 }}
           inputStyle={{ fontSize: 14 }}
           iconColor="#1E88E5"
           icon="magnify"
@@ -142,8 +102,8 @@ const RoleManagementScreen = () => {
           <Chip
             mode="flat"
             icon="shield-star"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
-            textStyle={{ color: 'white', fontSize: 12 }}
+            className="bg-white/20"
+            textStyle={{ color: 'green', fontSize: 12 }}
             onPress={handleRefresh}
           >
             Tất cả vai trò
@@ -151,15 +111,15 @@ const RoleManagementScreen = () => {
           <Chip
             mode="flat"
             icon="account-check"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
-            textStyle={{ color: 'white', fontSize: 12 }}
+            className="bg-white/15"
+            textStyle={{ color: 'green', fontSize: 12 }}
           >
             Đang kích hoạt
           </Chip>
         </View>
       </View>
 
-      {/* 2. Danh sách Roles (Body) */}
+      {/* 2. Roles List (Body) */}
       <View className="flex-1">
         {loading ? (
           <View className="flex-1 justify-center items-center">
@@ -168,10 +128,7 @@ const RoleManagementScreen = () => {
               size="large"
               color="#1E88E5"
             />
-            <Text
-              variant="bodyMedium"
-              style={{ color: '#64748B', marginTop: 12 }}
-            >
+            <Text className="text-slate-500 mt-3">
               Đang tải dữ liệu...
             </Text>
           </View>
@@ -186,46 +143,20 @@ const RoleManagementScreen = () => {
                 onDelete={() => handleDelete(item?.id)}
               />
             )}
-            // Giao diện khi chưa có dữ liệu (Empty State)
+            // Empty State UI
             ListEmptyComponent={
               <View className="items-center justify-center mt-20 px-6">
-                <View
-                  style={{
-                    width: 100,
-                    height: 100,
-                    borderRadius: 50,
-                    backgroundColor: '#E3F2FD',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    marginBottom: 16,
-                  }}
-                >
+                <View className="w-25 h-25 rounded-full bg-blue-100 justify-center items-center mb-4">
                   <IconButton
                     icon="shield-alert-outline"
                     size={48}
                     iconColor="#1E88E5"
                   />
                 </View>
-                <Text
-                  variant="titleMedium"
-                  style={{
-                    color: '#1E293B',
-                    fontWeight: '700',
-                    marginBottom: 8,
-                    textAlign: 'center'
-                  }}
-                >
+                <Text className="text-slate-900 text-lg font-bold mb-2 text-center">
                   Chưa có vai trò nào
                 </Text>
-                <Text
-                  variant="bodyMedium"
-                  style={{
-                    color: '#64748B',
-                    textAlign: 'center',
-                    lineHeight: 20,
-                    marginBottom: 20
-                  }}
-                >
+                <Text className="text-slate-500 text-center leading-5 mb-5">
                   Bắt đầu bằng cách tạo vai trò đầu tiên{'\n'}để phân quyền cho hệ thống
                 </Text>
                 <IconButton
@@ -248,23 +179,17 @@ const RoleManagementScreen = () => {
         )}
       </View>
 
-      {/* 3. Nút nổi Thêm mới (Floating Action Button) */}
+      {/* 3. Floating Add Button */}
       <FAB
         icon="plus"
         label="Thêm vai trò"
-        style={{
-          position: 'absolute',
-          bottom: 20,
-          right: 20,
-          backgroundColor: '#1E88E5',
-          borderRadius: 16,
-        }}
+        className="absolute bottom-5 right-5 bg-blue-600 rounded-2xl"
         color="white"
         onPress={handleAdd}
         visible={!loading}
       />
 
-      {/* 4. Modal (Ẩn/Hiện) */}
+      {/* 4. Modal (Show/Hide) */}
       <RoleEditModal
         visible={modalVisible}
         roleData={selectedRole}

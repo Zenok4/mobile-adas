@@ -1,26 +1,22 @@
 import React, { useState } from 'react';
-import { View, ScrollView, Pressable } from 'react-native';
-import { Modal, Portal, Text, TextInput, Button, Switch, Divider, useTheme, IconButton } from 'react-native-paper';
+import { Text, View, ScrollView, Pressable } from 'react-native';
+import { Modal, Portal, TextInput, Button, Switch, Divider, IconButton } from 'react-native-paper';
 
 interface RoleEditModalProps {
   visible: boolean;
   onDismiss: () => void;
-  roleData?: any; // Dữ liệu vai trò cần sửa (nếu có)
+  roleData?: any;
   onSaveSuccess?: () => void;
 }
 
 const RoleEditModal = ({ visible, onDismiss, roleData }: RoleEditModalProps) => {
-  const theme = useTheme();
-
-  // State quản lý Form
+  // Form State Management
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [level, setLevel] = useState('');
   const [isActive, setIsActive] = useState(true);
 
-  // Hàm xử lý khi bấm Lưu
   const handleSave = () => {
-    // TODO: Gọi API create hoặc update role tại đây
     console.log("Lưu dữ liệu:", { name, description, level, isActive });
     onDismiss();
   };
@@ -43,68 +39,53 @@ const RoleEditModal = ({ visible, onDismiss, roleData }: RoleEditModalProps) => 
           elevation: 8,
         }}
       >
-        {/* 1. Header Modal - Blue Theme */}
-        <View
-          style={{
-            backgroundColor: '#1E88E5',
-            paddingHorizontal: 20,
-            paddingVertical: 16,
-            borderTopLeftRadius: 16,
-            borderTopRightRadius: 16,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
+        {/* 1. Modal Header - Blue Theme */}
+        <View className="bg-blue-600 px-5 py-4 rounded-t-2xl flex-row justify-between items-center">
           <View className="flex-row items-center gap-2">
             <IconButton
               icon={roleData ? "pencil" : "plus-circle"}
               iconColor="white"
               size={24}
-              style={{ margin: 0 }}
+              className="m-0"
             />
-            <Text variant="titleLarge" style={{ color: 'white', fontWeight: '700' }}>
+            <Text className="text-white text-2xl font-bold">
               {roleData ? 'Chỉnh sửa vai trò' : 'Thêm vai trò mới'}
             </Text>
           </View>
 
-          {/* Icon đóng với press effect (màu đỏ khi nhấn) */}
+          {/* Close Icon with Press Effect */}
           <Pressable
             onPress={onDismiss}
+            className="w-9 h-9 rounded-full justify-center items-center active:bg-red-500"
             style={({ pressed }) => ({
-              width: 36,
-              height: 36,
-              borderRadius: 18,
               backgroundColor: pressed ? '#EF5350' : 'rgba(255, 255, 255, 0.2)',
-              justifyContent: 'center',
-              alignItems: 'center',
             })}
           >
             <IconButton
               icon="close"
               iconColor="white"
               size={20}
-              style={{ margin: 0 }}
+              className="m-0"
             />
           </Pressable>
         </View>
 
-        {/* 2. Nội dung Form (ScrollView) */}
+        {/* 2. Form Content (ScrollView) */}
         <ScrollView
           className="flex-1"
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ padding: 20 }}
         >
-          {/* Section: Thông tin cơ bản */}
+          {/* Section: Basic Information */}
           <View className="mb-6">
             <View className="flex-row items-center gap-2 mb-3">
-              <View style={{ width: 4, height: 20, backgroundColor: '#1E88E5', borderRadius: 2 }} />
-              <Text variant="titleMedium" style={{ fontWeight: '700', color: '#1E88E5' }}>
+              <View className="w-1 h-5 bg-blue-600 rounded" />
+              <Text className="text-blue-600 text-lg font-bold">
                 Thông tin cơ bản
               </Text>
             </View>
 
-            {/* Input Tên */}
+            {/* Name Input */}
             <TextInput
               label="Tên vai trò"
               mode="outlined"
@@ -117,7 +98,7 @@ const RoleEditModal = ({ visible, onDismiss, roleData }: RoleEditModalProps) => 
               left={<TextInput.Icon icon="account-circle" color="#1E88E5" />}
             />
 
-            {/* Input Mô tả */}
+            {/* Description Input */}
             <TextInput
               label="Mô tả vai trò"
               mode="outlined"
@@ -132,9 +113,9 @@ const RoleEditModal = ({ visible, onDismiss, roleData }: RoleEditModalProps) => 
               left={<TextInput.Icon icon="text-box" color="#1E88E5" />}
             />
 
-            {/* Row: Level và Status */}
+            {/* Row: Level and Status */}
             <View className="flex-row gap-3">
-              {/* Input Level */}
+              {/* Level Input */}
               <View className="flex-1">
                 <TextInput
                   label="Cấp độ"
@@ -151,29 +132,13 @@ const RoleEditModal = ({ visible, onDismiss, roleData }: RoleEditModalProps) => 
                 />
               </View>
 
-              {/* Switch Trạng thái */}
-              <View
-                style={{
-                  flex: 1,
-                  marginTop: 6,
-                  borderWidth: 1,
-                  borderColor: '#E3F2FD',
-                  borderRadius: 4,
-                  paddingHorizontal: 10,
-                  paddingVertical: 6,
-                  backgroundColor: '#F5FAFF',
-                  justifyContent: 'center',
-                }}
-              >
-                <Text variant="labelSmall" style={{ color: '#1E88E5', marginBottom: 4, fontWeight: '600' }}>
+              {/* Status Switch */}
+              <View className="flex-1 mt-2 border border-blue-100 rounded px-2.5 py-1.5 bg-blue-50 justify-center">
+                <Text className="text-blue-600 text-xs font-semibold mb-1">
                   Trạng thái
                 </Text>
                 <View className="flex-row items-center justify-between">
-                  <Text style={{
-                    color: isActive ? '#4CAF50' : '#9E9E9E',
-                    fontWeight: '600',
-                    fontSize: 13
-                  }}>
+                  <Text className={`font-semibold text-sm ${isActive ? 'text-green-600' : 'text-gray-500'}`}>
                     {isActive ? "✓ Kích hoạt" : "○ Tạm ngưng"}
                   </Text>
                   <Switch
@@ -186,62 +151,40 @@ const RoleEditModal = ({ visible, onDismiss, roleData }: RoleEditModalProps) => 
             </View>
           </View>
 
-          <Divider style={{ backgroundColor: '#E3F2FD', height: 1 }} />
+          <Divider className="bg-blue-100 h-px" />
 
-          {/* Section: Phân quyền chức năng */}
+          {/* Section: Permissions */}
           <View className="mt-6">
             <View className="flex-row items-center gap-2 mb-3">
-              <View style={{ width: 4, height: 20, backgroundColor: '#1E88E5', borderRadius: 2 }} />
-              <Text variant="titleMedium" style={{ fontWeight: '700', color: '#1E88E5' }}>
+              <View className="w-1 h-5 bg-blue-600 rounded" />
+              <Text className="text-blue-600 text-lg font-bold">
                 Phân quyền chức năng
               </Text>
             </View>
 
-            {/* Placeholder cho permissions */}
-            <View
-              style={{
-                backgroundColor: '#F5FAFF',
-                padding: 24,
-                borderRadius: 12,
-                borderWidth: 2,
-                borderStyle: 'dashed',
-                borderColor: '#BBDEFB',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
+            {/* Placeholder for Permissions */}
+            <View className="bg-blue-50 p-6 rounded-xl border-2 border-dashed border-blue-200 items-center justify-center">
               <IconButton
                 icon="shield-lock"
                 iconColor="#1E88E5"
                 size={40}
-                style={{ margin: 0, marginBottom: 8 }}
+                className="m-0 mb-2"
               />
-              <Text style={{ color: '#64B5F6', textAlign: 'center', fontSize: 14, fontWeight: '600' }}>
+              <Text className="text-blue-400 text-center text-sm font-semibold">
                 Danh sách quyền sẽ hiển thị tại đây
               </Text>
-              <Text style={{ color: '#90CAF9', fontSize: 12, marginTop: 4, textAlign: 'center' }}>
+              <Text className="text-blue-300 text-xs mt-1 text-center">
                 Dữ liệu lấy từ API Permissions List
               </Text>
             </View>
           </View>
 
-          {/* Khoảng trống để không bị che bởi footer */}
+          {/* Bottom Spacing */}
           <View className="h-6" />
         </ScrollView>
 
         {/* 3. Footer Buttons - Blue Theme */}
-        <View
-          style={{
-            padding: 16,
-            borderTopWidth: 1,
-            borderTopColor: '#E3F2FD',
-            backgroundColor: '#FAFAFA',
-            borderBottomLeftRadius: 16,
-            borderBottomRightRadius: 16,
-            flexDirection: 'row',
-            gap: 12,
-          }}
-        >
+        <View className="p-4 border-t border-blue-100 bg-gray-50 rounded-b-2xl flex-row gap-3">
           <Button
             mode="outlined"
             onPress={onDismiss}

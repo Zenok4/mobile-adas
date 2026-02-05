@@ -1,8 +1,8 @@
 import React from 'react';
-import { View } from 'react-native';
-import { Card, Text, Chip, IconButton, Divider, useTheme } from 'react-native-paper';
+import { View, Text } from 'react-native';
+import { Card, Chip, IconButton, Divider } from 'react-native-paper';
 
-// --- 1. TẠO DỮ LIỆU CỨNG ĐỂ TEST GIAO DIỆN ---
+// --- Demo data for testing UI ---
 const DEMO_ROLE = {
   id: 1,
   name: "Quản trị viên cấp cao",
@@ -19,12 +19,8 @@ interface RoleItemProps {
 }
 
 const RoleItem = ({ role, onEdit, onDelete }: RoleItemProps) => {
-  const theme = useTheme();
-
-  // --- 2. SỬ DỤNG DỮ LIỆU DEMO NẾU KHÔNG CÓ ROLE TRUYỀN VÀO ---
   const item = role || DEMO_ROLE;
 
-  // Hàm format ngày tháng
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
@@ -32,145 +28,95 @@ const RoleItem = ({ role, onEdit, onDelete }: RoleItemProps) => {
   };
 
   return (
-    <Card
-      className="mb-3 mx-1"
-      mode="elevated"
-      style={{
-        backgroundColor: 'white',
-        borderRadius: 12,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      }}
-    >
-      <Card.Content style={{ paddingBottom: 12 }}>
-        {/* Header: Tên và Trạng thái */}
+    <Card className="mb-3 mx-1 bg-white rounded-xl shadow-md">
+      <Card.Content className="pb-3 bg-blue-50 ">
+        {/* Header: Name and Status */}
         <View className="flex-row justify-between items-start mb-3">
           <View className="flex-1 mr-3">
-            <Text
-              variant="titleMedium"
-              style={{
-                fontWeight: '700',
-                color: '#1E293B',
-                fontSize: 16,
-                lineHeight: 22
-              }}
-            >
+            <Text className="text-slate-900 text-base font-bold leading-6">
               {item.name}
             </Text>
           </View>
 
           <Chip
             mode="flat"
-            style={{
-              backgroundColor: item.is_active ? '#DCFCE7' : '#FEF3C7',
-              height: 28,
-              justifyContent: 'center',
-            }}
+            className={`h-8 justify-center ${item.is_active ? 'bg-green-100' : 'bg-amber-100'}`}
             textStyle={{
               color: item.is_active ? '#15803D' : '#B45309',
               fontSize: 12,
               fontWeight: '600',
-              lineHeight: 14,
+              lineHeight: 12,
               marginVertical: 0,
             }}
             icon={item.is_active ? "check-circle" : "pause-circle"}
 
           >
             {item.is_active ? "Kích hoạt" : "Tạm ngưng"}
+
           </Chip>
         </View>
-
-        {/* Mô tả */}
+        {/* Description */}
         <Text
-          variant="bodyMedium"
-          style={{ color: '#64748B', lineHeight: 20, marginBottom: 12 }}
+          className="text-slate-500 leading-5 mb-3"
           numberOfLines={2}
         >
           {item.description}
         </Text>
 
-        {/* Thông tin phụ: Level & Ngày tạo */}
-        <View
-          style={{
-            backgroundColor: '#F8FAFC',
-            borderRadius: 8,
-            padding: 10,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            borderWidth: 1,
-            borderColor: '#E2E8F0',
-          }}
-        >
+        {/* Info: Level & Created Date */}
+        <View className="bg-slate-50 rounded-lg p-2.5 flex-row justify-between items-center border border-slate-200">
           {/* Level */}
           <View className="flex-row items-center gap-1">
             <IconButton
               icon="star"
               size={16}
               iconColor="#1E88E5"
-              style={{ margin: 0 }}
+              className="m-0"
             />
-            <Text variant="bodySmall" style={{ color: '#475569' }}>
-              Cấp độ: <Text style={{ fontWeight: '700', color: '#1E88E5' }}>{item.level}</Text>
+            <Text className="text-slate-600 text-sm">
+              Cấp độ: <Text className="font-bold text-blue-600">{item.level}</Text>
             </Text>
           </View>
 
-          <View style={{ width: 1, height: 20, backgroundColor: '#CBD5E1' }} />
+          <View className="w-px h-5 bg-slate-300" />
 
-          {/* Ngày tạo */}
+          {/* Created Date */}
           <View className="flex-row items-center gap-1">
             <IconButton
               icon="calendar"
               size={16}
               iconColor="#64748B"
-              style={{ margin: 0 }}
+              className="m-0"
             />
-            <Text variant="bodySmall" style={{ color: '#64748B' }}>
+            <Text className="text-slate-500 text-sm">
               {formatDate(item.created_at)}
             </Text>
           </View>
         </View>
       </Card.Content>
 
-      <Divider style={{ backgroundColor: '#E2E8F0' }} />
+      <Divider className="bg-slate-200" />
 
-      {/* Nút thao tác */}
-      <Card.Actions
-        style={{
-          justifyContent: 'flex-end',
-          paddingVertical: 4,
-          paddingHorizontal: 8,
-          minHeight: 48,
-          backgroundColor: '#F8FAFC',
-        }}
-      >
+      {/* Action Buttons */}
+      <Card.Actions className="justify-end py-1 px-2 min-h-[48px] bg-slate-50">
         <View className="flex-row gap-1">
-          {/* Nút Edit */}
+          {/* Edit Button */}
           <IconButton
             icon="pencil"
             size={20}
             iconColor="#1E88E5"
             onPress={onEdit}
-            style={{
-              margin: 0,
-              backgroundColor: '#E3F2FD',
-            }}
+            className="m-0 bg-blue-50"
             containerColor="#E3F2FD"
           />
 
-          {/* Nút Delete */}
+          {/* Delete Button */}
           <IconButton
             icon="trash-can"
             size={20}
             iconColor="#EF5350"
             onPress={onDelete}
-            style={{
-              margin: 0,
-              backgroundColor: '#FFEBEE',
-            }}
+            className="m-0 bg-red-50"
             containerColor="#FFEBEE"
           />
         </View>
