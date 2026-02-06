@@ -11,10 +11,10 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import HomeScreen from './src/screens/HomeScreen';
 import { PaperProvider } from 'react-native-paper';
-import "./global.css";
-import RoleManagementScreen from './src/screens/admin/RoleManagementScreen';
+import './global.css';
+import { NavigationContainer } from '@react-navigation/native';
+import AppNavigator from './src/navigation/AppNavigator';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -22,8 +22,10 @@ function App() {
   return (
     <PaperProvider>
       <SafeAreaProvider>
-        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'}/>
-           <RoleManagementScreen />
+        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
       </SafeAreaProvider>
     </PaperProvider>
   );
