@@ -2,29 +2,24 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { Card, Chip, IconButton, Divider } from 'react-native-paper';
 
-// --- Demo data for testing UI ---
-const DEMO_ROLE = {
-  id: 1,
-  name: "Quản trị viên cấp cao",
-  description: "Có toàn quyền truy cập hệ thống, quản lý người dùng và cấu hình.",
-  level: 99,
-  is_active: true,
-  created_at: "2025-10-20T08:30:00Z"
-};
-
 interface RoleItemProps {
-  role?: any;
+  role: any;
   onEdit: () => void;
   onDelete: () => void;
 }
 
 const RoleItem = ({ role, onEdit, onDelete }: RoleItemProps) => {
-  const item = role || DEMO_ROLE;
+  if (!role) return null;
 
+  // Giữ nguyên style hiển thị
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } catch (e) {
+      return dateString;
+    }
   };
 
   return (
@@ -33,48 +28,41 @@ const RoleItem = ({ role, onEdit, onDelete }: RoleItemProps) => {
         {/* Header: Name and Status */}
         <View className="flex-row justify-between items-start mb-3">
           <View className="flex-1 mr-3">
-            <Text className="text-slate-900 text-base font-bold leading-6">
-              {item.name}
+            <Text className="text-slate-900 text-base font-bold leading-6"
+              numberOfLines={2}
+            >
+              {role.name}
             </Text>
           </View>
 
           <Chip
             mode="flat"
-            className={`h-8 justify-center ${item.is_active ? 'bg-green-100' : 'bg-amber-100'}`}
+            className={`h-8 justify-center ${role.is_active ? 'bg-green-100' : 'bg-amber-100'}`}
             textStyle={{
-              color: item.is_active ? '#15803D' : '#B45309',
+              color: role.is_active ? '#15803D' : '#B45309',
               fontSize: 12,
               fontWeight: '600',
               lineHeight: 12,
               marginVertical: 0,
             }}
-            icon={item.is_active ? "check-circle" : "pause-circle"}
-
+            icon={role.is_active ? "check-circle" : "pause-circle"}
           >
-            {item.is_active ? "Kích hoạt" : "Tạm ngưng"}
-
+            {role.is_active ? "Kích hoạt" : "Tạm ngưng"}
           </Chip>
         </View>
+
         {/* Description */}
-        <Text
-          className="text-slate-500 leading-5 mb-3"
-          numberOfLines={2}
-        >
-          {item.description}
+        <Text className="text-slate-500 leading-5 mb-3" numberOfLines={2}>
+          {role.description || "Chưa có mô tả"}
         </Text>
 
         {/* Info: Level & Created Date */}
         <View className="bg-slate-50 rounded-lg p-2.5 flex-row justify-between items-center border border-slate-200">
           {/* Level */}
           <View className="flex-row items-center gap-1">
-            <IconButton
-              icon="star"
-              size={16}
-              iconColor="#1E88E5"
-              className="m-0"
-            />
+            <IconButton icon="star" size={16} iconColor="#1E88E5" className="m-0" />
             <Text className="text-slate-600 text-sm">
-              Cấp độ: <Text className="font-bold text-blue-600">{item.level}</Text>
+              Cấp độ: <Text className="font-bold text-blue-600">{role.level ?? 0}</Text>
             </Text>
           </View>
 
@@ -82,14 +70,9 @@ const RoleItem = ({ role, onEdit, onDelete }: RoleItemProps) => {
 
           {/* Created Date */}
           <View className="flex-row items-center gap-1">
-            <IconButton
-              icon="calendar"
-              size={16}
-              iconColor="#64748B"
-              className="m-0"
-            />
+            <IconButton icon="calendar" size={16} iconColor="#64748B" className="m-0" />
             <Text className="text-slate-500 text-sm">
-              {formatDate(item.created_at)}
+              {formatDate(role.created_at)}
             </Text>
           </View>
         </View>
@@ -100,7 +83,6 @@ const RoleItem = ({ role, onEdit, onDelete }: RoleItemProps) => {
       {/* Action Buttons */}
       <Card.Actions className="justify-end py-1 px-2 min-h-[48px] bg-slate-50">
         <View className="flex-row gap-1">
-          {/* Edit Button */}
           <IconButton
             icon="pencil"
             size={20}
@@ -109,8 +91,6 @@ const RoleItem = ({ role, onEdit, onDelete }: RoleItemProps) => {
             className="m-0 bg-blue-50"
             containerColor="#E3F2FD"
           />
-
-          {/* Delete Button */}
           <IconButton
             icon="trash-can"
             size={20}

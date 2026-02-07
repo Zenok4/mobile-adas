@@ -1,110 +1,159 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, FlatList, Text, Alert } from 'react-native';
-import { Searchbar, FAB, ActivityIndicator, IconButton, Chip } from 'react-native-paper';
+import { Searchbar, FAB, ActivityIndicator, Button, Chip, IconButton } from 'react-native-paper';
+import { useFocusEffect } from '@react-navigation/native';
 import RoleItem from '../../components/admin/RoleItem';
 import RoleEditModal from '../../components/admin/RoleEditModal';
+import { authService } from '../../services/authService';
 
 const RoleManagementScreen = () => {
+  // --- CẤU HÌNH ---
+  const ITEMS_PER_PAGE = 10;
+
   // --- STATE ---
-  const [roles, setRoles] = useState<any[]>([null, null, null]);
+  const [roles, setRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  // State lọc trạng thái: null (Tất cả) | true (Kích hoạt) | false (Tạm ngưng)
+  const [filterStatus, setFilterStatus] = useState<boolean | null>(null);
+  // State Phân trang
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: ITEMS_PER_PAGE,
+    total: 0,
+  });
 
-  // Modal Control State
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRole, setSelectedRole] = useState<any>(null);
 
+  // --- API CALL ---
+  const fetchRoles = async (pageToLoad: number = pagination.page) => {
+    setLoading(true);
+    try {
+      const data = await authService.listRoles({
+        page: pageToLoad,
+        limit: ITEMS_PER_PAGE,
+        name: searchQuery,
+        is_active: filterStatus
+      });
+
+      setRoles(data.roles);
+      setPagination(prev => ({
+        ...prev,
+        page: pageToLoad,
+        total: data.total
+      }));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      fetchRoles(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery, filterStatus]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchRoles(pagination.page);
+    }, [])
+  );
+
   // --- HANDLERS ---
-
-  // Open modal for adding new role
-  const handleAdd = () => {
-    setSelectedRole(null);
-    setModalVisible(true);
+  const handlePageChange = (newPage: number) => {
+    const totalPages = Math.ceil(pagination.total / pagination.limit);
+    if (newPage > 0 && newPage <= totalPages) {
+      fetchRoles(newPage);
+    }
   };
 
-  // Open modal for editing role
-  const handleEdit = (role: any) => {
-    setSelectedRole(role);
-    setModalVisible(true);
-  };
-
-  // Handle delete
+  const handleAdd = () => { setSelectedRole(null); setModalVisible(true); };
+  const handleEdit = (role: any) => { setSelectedRole(role); setModalVisible(true); };
   const handleDelete = (roleId: number) => {
-    Alert.alert(
-      "Xác nhận xóa",
-      "Bạn có chắc muốn xóa vai trò này? Hành động này không thể hoàn tác.",
-      [
-        {
-          text: "Hủy bỏ",
-          style: "cancel"
-        },
-        {
-          text: "Xóa",
-          style: "destructive",
-          onPress: () => {
-            console.log("Call API Delete Role ID:", roleId);
-            // TODO: Call API delete and reload list
-          }
-        }
-      ]
+    Alert.alert("Xác nhận xóa", "Bạn có chắc muốn xóa?", [
+      { text: "Hủy", style: "cancel" },
+      { text: "Xóa", style: "destructive", onPress: async () => {
+          try {
+            await authService.deleteRole(roleId);
+            fetchRoles(pagination.page);
+          } catch (e) { Alert.alert("Lỗi", "Xóa thất bại"); }
+      }}
+    ]);
+  };
+
+  // --- UI PHÂN TRANG (Footer) ---
+  const renderPagination = () => {
+    const totalPages = Math.ceil(pagination.total / pagination.limit);
+    if (pagination.total === 0) return null;
+
+    return (
+      <View className="flex-row justify-between items-center py-4 px-4 bg-gray-50 border-t border-gray-200 mb-20">
+        <Button
+          mode="outlined"
+          onPress={() => handlePageChange(pagination.page - 1)}
+          disabled={pagination.page <= 1}
+          icon="chevron-left"
+          contentStyle={{ height: 40, alignItems: 'center', justifyContent: 'center' }}
+          style={{ justifyContent: 'center' }}
+        >
+          Trước
+        </Button>
+
+        <Text className="text-gray-600 font-medium">
+          Trang {pagination.page} / {totalPages || 1}
+        </Text>
+
+        <Button
+          mode="outlined"
+          onPress={() => handlePageChange(pagination.page + 1)}
+          disabled={pagination.page >= totalPages}
+          icon="chevron-right"
+          contentStyle={{ flexDirection: 'row-reverse', height: 40, alignItems: 'center', justifyContent: 'center' }}
+          style={{ justifyContent: 'center' }}
+        >
+          Sau
+        </Button>
+      </View>
     );
   };
 
-  // Refresh list function (will call API)
-  const handleRefresh = () => {
-    console.log("Refresh danh sách roles");
-    // TODO: Call API to reload list
-  };
-
-  // --- RENDER ---
   return (
     <View className="flex-1 bg-gray-50">
-
-      {/* 1. Header Area - Blue Theme */}
+      {/* Header */}
       <View className="bg-blue-600 pt-4 pb-5 px-4 shadow-md">
-        {/* Title & Stats Row */}
         <View className="flex-row justify-between items-center mb-3">
           <View className="flex-1">
-            <Text className="text-white text-3xl font-bold mb-1">
-              Quản lý vai trò
-            </Text>
-            <Text className="text-white/80 text-base">
-              Phân quyền và cấu hình hệ thống
-            </Text>
+            <Text className="text-white text-3xl font-bold mb-1">Quản lý vai trò</Text>
+            <Text className="text-white/80 text-base">Phân quyền hệ thống</Text>
           </View>
-
-          {/* Stats Badge */}
           <View className="bg-white/20 rounded-2xl px-4 py-2 border border-white/30">
-            <Text className="text-white/80 text-xs font-bold mb-0.5">
-              Tổng số
-            </Text>
-            <Text className="text-white text-2xl font-bold text-center">
-              {roles.filter(r => r !== null).length}
-            </Text>
+            <Text className="text-white/80 text-xs font-bold mb-0.5">Tổng số</Text>
+            <Text className="text-white text-2xl font-bold text-center">{pagination.total}</Text>
           </View>
         </View>
 
-        {/* Search Bar */}
         <Searchbar
-          placeholder="Tìm kiếm theo tên vai trò..."
+          placeholder="Tìm kiếm..."
           onChangeText={setSearchQuery}
           value={searchQuery}
           className="bg-white rounded-xl"
-          style={{ elevation: 0 }}
-          inputStyle={{ fontSize: 14 }}
           iconColor="#1E88E5"
-          icon="magnify"
-          clearIcon="close-circle"
         />
 
-        {/* Quick Actions */}
+        {/* --- Filter Quick Actions Chips --- */}
         <View className="flex-row gap-2 mt-3">
           <Chip
             mode="flat"
             icon="shield-star"
             className="bg-white/20"
             textStyle={{ color: 'green', fontSize: 12 }}
-            onPress={handleRefresh}
+            onPress={() => setFilterStatus(null)}
+            selected={filterStatus === null}
+            showSelectedOverlay={true}
           >
             Tất cả vai trò
           </Chip>
@@ -113,88 +162,62 @@ const RoleManagementScreen = () => {
             icon="account-check"
             className="bg-white/15"
             textStyle={{ color: 'green', fontSize: 12 }}
+            onPress={() => setFilterStatus(true)}
+            selected={filterStatus === true}            
           >
-            Đang kích hoạt
+            Kích hoạt
+          </Chip>
+          <Chip
+            mode="flat"
+            icon="account-off"
+            className="bg-white/15"
+            textStyle={{ color: 'red', fontSize: 12 }}
+            onPress={() => setFilterStatus(false)}
+            selected={filterStatus === false}            
+          >
+            Tạm ngưng
           </Chip>
         </View>
+        {/* --------------------------------------------- */}
+
       </View>
 
-      {/* 2. Roles List (Body) */}
+      {/* List */}
       <View className="flex-1">
         {loading ? (
-          <View className="flex-1 justify-center items-center">
-            <ActivityIndicator
-              animating={true}
-              size="large"
-              color="#1E88E5"
-            />
-            <Text className="text-slate-500 mt-3">
-              Đang tải dữ liệu...
-            </Text>
-          </View>
+          <View className="flex-1 justify-center items-center"><ActivityIndicator size="large" color="#1E88E5" /></View>
         ) : (
           <FlatList
             data={roles}
-            keyExtractor={(item, index) => item?.id?.toString() || index.toString()}
+            keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
-              <RoleItem
-                role={item}
-                onEdit={() => handleEdit(item)}
-                onDelete={() => handleDelete(item?.id)}
-              />
+              <RoleItem role={item} onEdit={() => handleEdit(item)} onDelete={() => handleDelete(item.id)} />
             )}
-            // Empty State UI
+            ListFooterComponent={renderPagination}
+            // Thêm ListEmptyComponent khi không có dữ liệu
             ListEmptyComponent={
-              <View className="items-center justify-center mt-20 px-6">
-                <View className="w-25 h-25 rounded-full bg-blue-100 justify-center items-center mb-4">
-                  <IconButton
-                    icon="shield-alert-outline"
-                    size={48}
-                    iconColor="#1E88E5"
-                  />
+                <View className="items-center justify-center mt-20 px-6">
+                  <View className="w-25 h-25 rounded-full bg-blue-100 justify-center items-center mb-4">
+                    <IconButton icon="shield-alert-outline" size={48} iconColor="#1E88E5" />
+                  </View>
+                  <Text className="text-slate-900 text-lg font-bold mb-2 text-center">Chưa có vai trò nào</Text>
+                  <Button mode="contained" onPress={handleAdd} buttonColor="#1E88E5">Thêm ngay</Button>
                 </View>
-                <Text className="text-slate-900 text-lg font-bold mb-2 text-center">
-                  Chưa có vai trò nào
-                </Text>
-                <Text className="text-slate-500 text-center leading-5 mb-5">
-                  Bắt đầu bằng cách tạo vai trò đầu tiên{'\n'}để phân quyền cho hệ thống
-                </Text>
-                <IconButton
-                  icon="plus-circle"
-                  size={32}
-                  iconColor="#1E88E5"
-                  mode="contained"
-                  containerColor="#E3F2FD"
-                  onPress={handleAdd}
-                />
-              </View>
             }
-            contentContainerStyle={{
-              paddingTop: 12,
-              paddingHorizontal: 12,
-              paddingBottom: 100
-            }}
-            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingTop: 12, paddingHorizontal: 12 }}
           />
         )}
       </View>
 
-      {/* 3. Floating Add Button */}
-      <FAB
-        icon="plus"
-        label="Thêm vai trò"
-        className="absolute bottom-5 right-5 bg-blue-600 rounded-2xl"
-        color="white"
-        onPress={handleAdd}
-        visible={!loading}
-      />
+      <FAB icon="plus" className="absolute bottom-5 right-5 bg-blue-600 rounded-2xl" color="white" onPress={handleAdd} />
 
-      {/* 4. Modal (Show/Hide) */}
       <RoleEditModal
         visible={modalVisible}
         roleData={selectedRole}
         onDismiss={() => setModalVisible(false)}
-        onSaveSuccess={handleRefresh}
+        onSaveSuccess={() => fetchRoles(pagination.page)}
+        existingRoles={roles}   // Truyền danh sách để check trùng tên
+        currentUserLevel={99}
       />
     </View>
   );

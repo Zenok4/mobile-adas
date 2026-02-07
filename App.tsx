@@ -15,6 +15,7 @@ import { PaperProvider } from 'react-native-paper';
 import './global.css';
 import { NavigationContainer } from '@react-navigation/native';
 import AppNavigator from './src/navigation/AppNavigator';
+import RoleManagementScreen from './src/screens/admin/RoleManagementScreen';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -24,7 +25,7 @@ function App() {
       <SafeAreaProvider>
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
         <NavigationContainer>
-          <AppNavigator />
+          <RoleManagementScreen />
         </NavigationContainer>
       </SafeAreaProvider>
     </PaperProvider>
