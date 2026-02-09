@@ -1,20 +1,34 @@
 import React from 'react';
-import { Card, Text, Switch } from 'react-native-paper';
+import { View, Text, Switch } from 'react-native';
 
-type Props = {
+// Khai báo Interface để hết lỗi "Property does not exist"
+interface FeatureCardProps {
   icon: React.ReactNode;
   title: string;
-};
+  isEnabled: boolean;
+  onToggle: (val: boolean) => void;
+}
 
-export default function FeatureCard({ icon, title }: Props) {
+export default function FeatureCard({
+  icon,
+  title,
+  isEnabled,
+  onToggle,
+}: FeatureCardProps) {
   return (
-    <Card className="w-[48%] mb-4 rounded-2xl">
-      <Card.Content className="items-center">
-        {icon}
-        <Text className="text-xs text-center mt-1">{title}</Text>
-        <Text className="text-xs text-blue-600 mt-1">Đang bật</Text>
-        <Switch value />
-      </Card.Content>
-    </Card>
+    <View className="w-[48%] bg-white p-4 rounded-2xl mb-4 shadow-sm border border-gray-100">
+      <View className="flex-row justify-between items-start mb-2">
+        <View className="p-2 bg-blue-50 rounded-lg">{icon}</View>
+        <Switch
+          value={isEnabled}
+          onValueChange={onToggle}
+          trackColor={{ false: '#D1D5DB', true: '#818CF8' }}
+        />
+      </View>
+      <Text className="font-bold text-gray-800 text-sm">{title}</Text>
+      <Text className="text-[10px] text-gray-500">
+        {isEnabled ? 'Đang bật' : 'Đang tắt'}
+      </Text>
+    </View>
   );
 }
