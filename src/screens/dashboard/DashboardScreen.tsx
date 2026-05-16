@@ -4,6 +4,7 @@ import {
   Camera as VisionCamera,
   useCameraDevice,
   useCameraPermission,
+  usePhotoOutput,
 } from 'react-native-vision-camera';
 
 import RNFS from 'react-native-fs';
@@ -35,6 +36,7 @@ import { AdasFeatures } from '../../types';
 
 import { FeatureCard } from './_components/FeatureCard';
 import { CameraPanel } from './_components/CameraPanel';
+import { Detection } from './_components/BBoxOverlay';
 import { InfoWidget } from './_components/InfoWidget';
 
 const FEATURE_CONFIG = [
@@ -103,7 +105,10 @@ export default function DashboardScreen() {
 
   const device = useCameraDevice('back');
 
-  const cameraRef = useRef<any>(null);
+  const isCameraReadyRef = useRef(false);
+
+  // V5: dùng usePhotoOutput thay vì cameraRef.takePhoto()
+  const photoOutput = usePhotoOutput();
 
   // ─────────────────────────────────────
   // State
@@ -111,6 +116,12 @@ export default function DashboardScreen() {
 
   const [cameraOn, setCameraOn] =
     useState(false);
+
+  const [isCameraReady, setIsCameraReady] =
+    useState(false);
+
+  // Kích thước ảnh gốc để scale bbox đúng tỉ lệ
+  const [imageSize, setImageSize] = useState<{ width: number; height: number } | undefined>(undefined);
 
   const [soundOn, setSoundOn] =
     useState(true);
@@ -128,37 +139,44 @@ export default function DashboardScreen() {
   // ─────────────────────────────────────
 
   const captureFrame = useCallback(async () => {
+    if (!isCameraReadyRef.current) {
+      console.log('[CAPTURE] Camera chưa sẵn sàng');
+      return null;
+    }
     try {
-      const camera = cameraRef.current;
+      console.log('[CAPTURE] Bắt đầu chụp...');
 
-      if (!camera?.takePhoto) {
-        console.log(
-          'Camera chưa sẵn sàng',
-        );
-        return null;
-      }
+      // V5 API: capturePhotoToFile thay vì cameraRef.takePhoto()
+      const { filePath } = await photoOutput.capturePhotoToFile({}, {});
 
-      const photo =
-        await camera.takePhoto({
-          flash: 'off',
+      // filePath từ v5 đã là path thuần, không có file:// prefix
+      const cleanPath = filePath.startsWith('file://')
+        ? filePath.slice(7)
+        : filePath;
+
+      console.log('[CAPTURE] filePath:', cleanPath);
+
+      // Lấy kích thước ảnh để scale bbox
+      try {
+        const { Image } = require('react-native');
+        Image.getSize(`file://${cleanPath}`, (w: number, h: number) => {
+          setImageSize({ width: w, height: h });
         });
+      } catch {}
 
-      const base64 =
-        await RNFS.readFile(
-          photo.path,
-          'base64',
-        );
+      const base64 = await RNFS.readFile(cleanPath, 'base64');
+
+      console.log('[CAPTURE] base64 length:', base64?.length ?? 0);
+
+      // Dọn file tạm
+      RNFS.unlink(cleanPath).catch(() => {});
 
       return base64;
     } catch (err) {
-      console.log(
-        '[CAPTURE ERROR]',
-        err,
-      );
-
+      console.log('[CAPTURE ERROR]', err);
       return null;
     }
-  }, []);
+  }, [photoOutput]);
 
   // ─────────────────────────────────────
   // Drowsy AI
@@ -170,7 +188,8 @@ export default function DashboardScreen() {
   } = useDrowsy({
     enabled:
       features.sleepAlert &&
-      cameraOn,
+      cameraOn &&
+      isCameraReady,
 
     captureFrame,
 
@@ -202,7 +221,7 @@ export default function DashboardScreen() {
       enableObject:
         features.objectDetect,
 
-      active: cameraOn,
+      active: cameraOn && isCameraReady,
 
       captureFrame,
 
@@ -265,6 +284,12 @@ export default function DashboardScreen() {
 
         setCameraOn(anyFeatureOn);
 
+        // Reset camera ready khi tắt camera để onStarted fire lại
+        if (!anyFeatureOn) {
+          isCameraReadyRef.current = false;
+          setIsCameraReady(false);
+        }
+
         return next;
       });
     },
@@ -278,6 +303,8 @@ export default function DashboardScreen() {
   const handleMainButton = () => {
     if (cameraOn) {
       setCameraOn(false);
+      isCameraReadyRef.current = false;
+      setIsCameraReady(false);
 
       setFeatures({
         sleepAlert: false,
@@ -312,6 +339,12 @@ export default function DashboardScreen() {
           },
         ]
       : []),
+  ];
+
+  // Gộp tất cả detections để render bbox lên camera
+  const allDetections: Detection[] = [
+    ...signs.map(s => ({ ...s, _type: 'sign' as const })),
+    ...objects.map(o => ({ ...o, _type: 'object' as const })),
   ];
 
   // ─────────────────────────────────────
@@ -614,46 +647,39 @@ export default function DashboardScreen() {
         <CameraPanel
           title="Camera AI"
           iconName="camera"
-          active={
-            cameraOn &&
-            !!device
-          }
+          active={cameraOn && !!device}
           aiEnabled={activeCount > 0}
           badge={drowsyBadge}
           isDanger={isDanger}
           chips={rearChips}
           placeholder="Bật tính năng để mở camera"
+          detections={allDetections}
+          imageSize={imageSize}
           cameraComponent={
-            device &&
-            cameraOn ? (
+            device && cameraOn ? (
               <VisionCamera
-                ref={cameraRef}
-                style={
-                  StyleSheet.absoluteFill
-                }
+                style={StyleSheet.absoluteFill}
                 device={device}
                 isActive={cameraOn}
-                photo={true}
+                outputs={[photoOutput]}
                 onInitialized={() => {
-                  console.log(
-                    'CAMERA READY',
-                  );
+                  console.log('CAMERA INITIALIZED');
                 }}
                 onStarted={() => {
-                  console.log(
-                    'CAMERA STARTED',
-                  );
+                  console.log('CAMERA STARTED');
+                  setTimeout(() => {
+                    isCameraReadyRef.current = true;
+                    setIsCameraReady(true);
+                    console.log('[CAMERA] Ready to capture');
+                  }, 300);
                 }}
                 onPreviewStarted={() => {
-                  console.log(
-                    'PREVIEW STARTED',
-                  );
+                  console.log('PREVIEW STARTED');
                 }}
                 onError={e => {
-                  console.log(
-                    'CAMERA ERROR',
-                    e,
-                  );
+                  console.log('CAMERA ERROR', e);
+                  isCameraReadyRef.current = false;
+                  setIsCameraReady(false);
                 }}
               />
             ) : null
@@ -830,4 +856,5 @@ const styles = StyleSheet.create({
   bottomPad: {
     height: 16,
   },
+
 });

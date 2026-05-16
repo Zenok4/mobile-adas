@@ -3,6 +3,7 @@
 import {
   View,
   StyleSheet,
+  useWindowDimensions,
 } from 'react-native';
 
 import {
@@ -13,6 +14,8 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { ReactNode } from 'react';
+
+import { BBoxOverlay, Detection } from './BBoxOverlay';
 
 interface Badge {
   text: string;
@@ -35,6 +38,10 @@ interface Props {
   isDanger?: boolean;
   chips?: DetectionChip[];
   cameraComponent?: ReactNode;
+  /** Danh sách bbox từ AI detection */
+  detections?: Detection[];
+  /** Kích thước ảnh gốc AI xử lý */
+  imageSize?: { width: number; height: number };
 }
 
 export function CameraPanel({
@@ -47,7 +54,11 @@ export function CameraPanel({
   isDanger,
   chips = [],
   cameraComponent,
+  detections = [],
+  imageSize,
 }: Props) {
+  const { width: screenWidth } = useWindowDimensions();
+  const PREVIEW_HEIGHT = 220;
   return (
     <Card
       style={[
@@ -108,6 +119,16 @@ export function CameraPanel({
         {active ? (
           <>
             {cameraComponent}
+
+            {detections.length > 0 && imageSize && (
+              <BBoxOverlay
+                detections={detections}
+                imageWidth={imageSize.width}
+                imageHeight={imageSize.height}
+                previewWidth={screenWidth}
+                previewHeight={PREVIEW_HEIGHT}
+              />
+            )}
 
             {badge && (
               <View
