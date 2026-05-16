@@ -1,7 +1,7 @@
 {
   "extends": "@react-native/typescript-config",
   "compilerOptions": {
-    "types": ["jest"],
+    "types": ["jest"]
   },
   "include": ["**/*.ts", "**/*.tsx", "nativewind-env.d.ts", "react-native-vector-icons.d.ts"],
   "exclude": ["**/node_modules", "**/Pods"]

@@ -1,23 +1,33 @@
-import { FlatList } from "react-native";
-import { DetectionItem } from "./DetectionItem";
-import { Detection, DetectionType } from "../../../types/trip";
+import { FlatList, View } from 'react-native';
+import { Text } from 'react-native-paper';
+import { Detection, DetectionType } from '../../../types';
+import { DetectionItem } from './DetectionItem';
 
-export function DetectionList({
-  data,
-  filter,
-}: {
+interface Props {
   data: Detection[];
   filter: DetectionType | null;
-}) {
-  const filtered = filter
-    ? data.filter((d) => d.type === filter)
-    : data;
+}
+
+export function DetectionList({ data, filter }: Props) {
+  const filtered = filter ? data.filter(d => d.type === filter) : data;
+
+  if (filtered.length === 0) {
+    return (
+      <View className="items-center py-10">
+        <Text className="text-4xl mb-3">📋</Text>
+        <Text variant="bodyMedium" className="text-gray-500">
+          Không có sự kiện nào
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <FlatList
       data={filtered}
-      keyExtractor={(item) => item.id}
-      contentContainerStyle={{ gap: 12 }}
+      keyExtractor={item => item.id}
+      contentContainerStyle={{ gap: 10 }}
+      scrollEnabled={false}
       renderItem={({ item }) => <DetectionItem item={item} />}
     />
   );

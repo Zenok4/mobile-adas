@@ -15,6 +15,7 @@ import { PaperProvider } from 'react-native-paper';
 import './global.css';
 import { NavigationContainer } from '@react-navigation/native';
 import AppNavigator from './src/navigation/AppNavigator';
+import { SessionProvider } from './src/context/SessionContext';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -22,10 +23,12 @@ function App() {
   return (
     <PaperProvider>
       <SafeAreaProvider>
-        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-        <NavigationContainer>
-          <AppNavigator />
-        </NavigationContainer>
+        <SessionProvider>
+          <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+          <NavigationContainer>
+            <AppNavigator />
+          </NavigationContainer>
+        </SessionProvider>
       </SafeAreaProvider>
     </PaperProvider>
   );

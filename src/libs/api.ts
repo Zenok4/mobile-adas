@@ -1,6 +1,7 @@
 //api.ts
 import axios from 'axios';
 import Config from 'react-native-config';
+import { loadToken } from './tokenStorage';
 
 export const api = axios.create({
   baseURL: Config.API_BASE_URL,
@@ -11,7 +12,7 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use(async (config) => {
-  const token = 'JWT_TOKEN_Ở_ĐÂY';
+  const token = await loadToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

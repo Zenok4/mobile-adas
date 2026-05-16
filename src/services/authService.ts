@@ -1,0 +1,144 @@
+import { api } from "../libs/api";
+import { ApiUrls } from "../types/apiUrls";
+
+
+export interface ListRolesParams {
+  page?: number;
+  limit?: number;
+  name?: string;
+  discription?: string;
+  is_active?: boolean | null;
+  list_permissions?: boolean;
+}
+
+export interface RolePayload {
+  name: string;
+  description?: string;
+  is_active?: boolean;
+  level?: number;
+}
+
+export const AuthService = {
+  // ================= LOGIN & LOGOUT =================
+  loginWithUsername: (username: string, password: string) =>
+    api.post(ApiUrls.authen.loginUsername, { username, password }),
+
+  loginWithEmail: (email: string, password: string, otp_code?: string) =>
+    api.post(ApiUrls.authen.loginEmail, { email, password, otp_code }),
+
+  logout: () => api.post(ApiUrls.authen.logout),
+
+  me: (access_token: string) =>
+    api.get(ApiUrls.authen.me, {
+      headers: { Authorization: `Bearer ${access_token}` },
+    }),
+
+  refresh: (session_id: string) =>
+    api.post(ApiUrls.authen.refresh, { session_id }),
+
+  // ================= REQUEST OTP =================
+  requestEmailOtp: (email: string) =>
+    api.post(ApiUrls.authen.requestEmailOtp, { email }),
+
+  requestRegisterOtp: (email: string) =>
+    api.post(ApiUrls.authen.registerEmailOtp, { email }),
+
+  // ================= REGISTER =================
+  registerWithUsername: (username: string, password: string) =>
+    api.post(ApiUrls.authen.registerWithUsername, { username, password }),
+
+  registerWithEmail: (email: string, password: string, otp_code: string) =>
+    api.post(ApiUrls.authen.registerWithEmail, { email, password, otp_code }),
+
+  registerWithPhone: (phone: string, password: string, otp_code: string) =>
+    api.post(ApiUrls.authen.registerWithPhone, { phone, password, otp_code }),
+
+  // ================= FORGOT PASSWORD =================
+  forgotPasswordEmailSendOtp: (email: string) =>
+    api.post(ApiUrls.authen.forgotPassword.email.sendOtp, { email }),
+
+  forgotPasswordEmailReset: (
+    email: string,
+    otp_code: string,
+    new_password: string
+  ) =>
+    api.post(ApiUrls.authen.forgotPassword.email.reset, {
+      email,
+      otp_code,
+      new_password,
+    }),
+
+  forgotPasswordPhoneSendOtp: (phone: string) =>
+    api.post(ApiUrls.authen.forgotPassword.phone.sendOtp, { phone }),
+
+  forgotPasswordPhoneReset: (
+    phone: string,
+    otp_code: string,
+    new_password: string
+  ) =>
+    api.post(ApiUrls.authen.forgotPassword.phone.reset, {
+      phone,
+      otp_code,
+      new_password,
+    }),
+
+  // ================= ROLES & PERMISSIONS =================
+  permission: () => api.get(ApiUrls.author.permissions.list),
+
+  ListRoles: (params: ListRolesParams = {}) =>
+    api.get(ApiUrls.author.roles.list, {
+      params: params,
+    }),
+
+  getRole: (id: number, includePermissions: boolean = false) =>
+    api.get(ApiUrls.author.roles.detail(id), {
+      params: {
+        list_permissions: includePermissions,
+      },
+    }),
+
+  createRole: (data: RolePayload) =>
+    api.post(ApiUrls.author.roles.create, data),
+
+  updateRole: (id: number, data: RolePayload) =>
+    api.put(ApiUrls.author.roles.update(id), data),
+
+  deleteRole: (id: number, currentUserLevel: number) =>
+    api.delete(ApiUrls.author.roles.delete(id), {
+      params: {
+        current_user_level: currentUserLevel,
+      },
+    }),
+
+  // ===== Permissions =====
+  listPermissions: () => api.get(ApiUrls.author.permissions.list),
+
+  rolePermissions: (roleId: number) =>
+    api.get(ApiUrls.author.permissions.rolePermissions(roleId)),
+
+  getPermission: (id: number) =>
+    api.get(ApiUrls.author.permissions.detail(id)),
+
+  createPermission: (data: any) =>
+    api.post(ApiUrls.author.permissions.create, data),
+
+  updatePermission: (id: number, data: any) =>
+    api.put(ApiUrls.author.permissions.update(id), data),
+
+  deletePermission: (id: number) =>
+    api.delete(ApiUrls.author.permissions.delete(id)),
+
+  assignPermissionToRole: (roleId: number, permIds: number[]) =>
+    api.post(
+      ApiUrls.author.permissions.assignToRole(roleId),
+      { perm_ids: permIds },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    ),
+
+  removePermissionFromRole: (roleId: number, permId: number) =>
+    api.delete(ApiUrls.author.permissions.removeFromRole(roleId, permId)),
+};

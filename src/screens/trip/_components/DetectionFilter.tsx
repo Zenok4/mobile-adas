@@ -1,28 +1,23 @@
-import { View, StyleSheet } from "react-native";
-import { DetectionType } from "../../../types/trip";
-import { Tag } from "./tag";
+import { View } from 'react-native';
+import { DetectionType } from '../../../types';
+import { Tag } from '../../../components/common/Tag';
+import { DETECTION_CONFIG } from '../../../theme';
 
-const FILTERS: {
-  type: DetectionType;
-  label: string;
-  color: string;
-}[] = [
-  { type: "DROWSY", label: "Buồn ngủ", color: "#f97316" },
-  { type: "OBSTACLE", label: "Vật cản", color: "#ef4444" },
-  { type: "LANE_DEVIATION", label: "Làn đường", color: "#3b82f6" },
-  { type: "SPEED_SIGN", label: "Biển báo", color: "#22c55e" },
-];
+const FILTERS = Object.entries(DETECTION_CONFIG).map(([type, cfg]) => ({
+  type: type as DetectionType,
+  label: cfg.label,
+  color: cfg.color,
+}));
 
-export function DetectionFilter({
-  active,
-  onChange,
-}: {
+interface Props {
   active: DetectionType | null;
   onChange: (type: DetectionType | null) => void;
-}) {
+}
+
+export function DetectionFilter({ active, onChange }: Props) {
   return (
-    <View style={styles.container}>
-      {FILTERS.map((f) => (
+    <View className="flex-row flex-wrap gap-2">
+      {FILTERS.map(f => (
         <Tag
           key={f.type}
           label={f.label}
@@ -34,11 +29,3 @@ export function DetectionFilter({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-});

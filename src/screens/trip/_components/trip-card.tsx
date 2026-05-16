@@ -1,51 +1,60 @@
-import { View, Text, Pressable } from 'react-native';
-import { Card } from 'react-native-paper';
+import { View, Pressable } from 'react-native';
+import { Card, Text } from 'react-native-paper';
+import { TripListItem } from '../../../types';
+import { DETECTION_CONFIG } from '../../../theme';
 import { Tag } from './tag';
 
-const COLORS = {
-  DROWSY: '#f97316',
-  OBSTACLE: '#ef4444',
-  LANE_DEVIATION: '#3b82f6',
-  SPEED_SIGN: '#22c55e',
-};
-
 interface Props {
-  item: any;
+  item: TripListItem;
   onPress: () => void;
 }
 
-export function JourneyCard({ item, onPress }: Props) {
+export function TripCard({ item, onPress }: Props) {
   return (
     <Pressable onPress={onPress}>
       <Card className="rounded-2xl">
         <Card.Content className="flex-row gap-4">
-          {/* Date */}
-          <View className="items-center">
-            <Text className="text-lg font-bold text-blue-600">{item.date}</Text>
-            <Text className="text-xs text-gray-500">{item.month}</Text>
+          {/* Date block */}
+          <View className="items-center justify-center bg-blue-50 rounded-xl px-3 py-2 min-w-[52px]">
+            <Text variant="titleLarge" className="font-black text-blue-600">
+              {item.date}
+            </Text>
+            <Text variant="labelSmall" className="text-gray-500">
+              {item.month}
+            </Text>
           </View>
 
           {/* Info */}
           <View className="flex-1 gap-1">
-            <Text className="font-semibold">{item.vehicle}</Text>
-            <Text className="text-sm text-gray-600">{item.route}</Text>
+            <Text variant="titleSmall" className="font-semibold text-gray-800">
+              {item.vehicle}
+            </Text>
+            <Text variant="bodySmall" className="text-gray-600">
+              📍 {item.route}
+            </Text>
 
-            <View className="flex-row gap-3 mt-1">
-              <Text className="text-xs text-gray-500">⏱ {item.duration}</Text>
-              <Text className="text-xs text-gray-500">
+            <View className="flex-row gap-3 mt-0.5">
+              <Text variant="labelSmall" className="text-gray-500">
+                ⏱ {item.duration}
+              </Text>
+              <Text variant="labelSmall" className="text-gray-500">
                 ⚠ {item.totalWarnings} cảnh báo
               </Text>
             </View>
 
-            {/* Stats */}
+            {/* Stats tags */}
             <View className="flex-row flex-wrap gap-1 mt-2">
-              {Object.entries(item.stats).map(([key, value]) => (
-                <Tag
-                  key={key}
-                  label={`${labelMap[key]}: ${value}`}
-                  color={COLORS[key as keyof typeof COLORS]}
-                />
-              ))}
+              {Object.entries(item.stats).map(([key, value]) => {
+                const cfg = DETECTION_CONFIG[key as keyof typeof DETECTION_CONFIG];
+                if (!cfg || !value) return null;
+                return (
+                  <Tag
+                    key={key}
+                    label={`${cfg.label}: ${value}`}
+                    color={cfg.color}
+                  />
+                );
+              })}
             </View>
           </View>
         </Card.Content>
@@ -53,10 +62,3 @@ export function JourneyCard({ item, onPress }: Props) {
     </Pressable>
   );
 }
-
-const labelMap: Record<string, string> = {
-  DROWSY: 'Buồn ngủ',
-  OBSTACLE: 'Vật cản',
-  LANE_DEVIATION: 'Làn đường',
-  SPEED_SIGN: 'Biển báo',
-};

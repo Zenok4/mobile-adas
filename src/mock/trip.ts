@@ -1,7 +1,7 @@
-import { Detection, JourneySummary } from "../types/trip";
+import { Detection, TripSummary } from "../types/trip";
 
 export const JOURNEY_DETAIL: {
-  summary: JourneySummary;
+  summary: TripSummary;
   detections: Detection[];
 } = {
   summary: {

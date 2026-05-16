@@ -1,8 +1,8 @@
 export type DetectionType =
-  | "SPEED_SIGN"
-  | "DROWSY"
-  | "OBSTACLE"
-  | "LANE_DEVIATION";
+  | 'SPEED_SIGN'
+  | 'DROWSY'
+  | 'OBSTACLE'
+  | 'LANE_DEVIATION';
 
 export interface Detection {
   id: string;
@@ -43,4 +43,11 @@ export interface TripListItem {
     lane?: number;
     [key: string]: number | undefined;
   };
+}
+
+export interface AdasFeatures {
+  sleepAlert: boolean;
+  objectDetect: boolean;
+  signDetect: boolean;
+  laneMonitor: boolean;
 }
